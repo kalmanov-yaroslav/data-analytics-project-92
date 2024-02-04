@@ -49,8 +49,8 @@ select
 	to_char(sale_date, 'day') as weekday,
 	COALESCE(round(sum(s.quantity * p.price)),0) income
 FROM
-	employees e 
-	left join sales s on e.employee_id  = s.sales_person_id 
+	sales s 
+	left join employees e on e.employee_id  = s.sales_person_id 
 	left join products p on p.product_id = s.product_id 
 group by 
 	concat(first_name , ' ', last_name),
@@ -82,7 +82,7 @@ order by
 select 
 	to_char(sale_date, 'yyyy-mm') as date,
 	count(distinct customer_id) as total_customers,
-	sum(s.quantity * p.price) income
+	FLOOR(sum(s.quantity * p.price)) income
 from 
 	sales s 
 	left join products p on p.product_id = s.product_id
