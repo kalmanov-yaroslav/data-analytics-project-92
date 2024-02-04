@@ -59,3 +59,68 @@ group by
 order by
 	extract(isodow from sale_date),
 	concat(first_name , ' ', last_name)
+
+
+-- age_groups
+select 
+	case 
+		when age >= 16 and age <= 25 then '16-25'
+		when age >= 26 and age <= 40 then '26-40'
+		when age > 40 then '40+'
+		else 'other'
+	end age_category,
+	count(1) as count
+from 
+	customers c 
+group by 
+	age_category
+order by
+	age_category
+
+
+-- customers_by_month
+select 
+	to_char(sale_date, 'yyyy-mm') as date,
+	count(distinct customer_id) as total_customers,
+	sum(s.quantity * p.price) income
+from 
+	sales s 
+	left join products p on p.product_id = s.product_id
+group by
+	date
+order by
+	date
+
+
+-- special_offer
+with 
+sales_with_dr as (
+	select 
+		*,
+		dense_rank () over (partition by customer_id order by sale_date) dr
+	from
+		sales s 
+	order by 
+		sale_date 
+)
+
+select 
+	concat(c.first_name , ' ', c.last_name) as customer,
+	s.sale_date ,
+	concat(e.first_name , ' ', e.last_name) as seller
+from 
+	sales_with_dr s 
+	left join products p on s.product_id = p.product_id 
+	left join customers c on s.customer_id = c.customer_id 
+	left join employees e on s.sales_person_id = e.employee_id 
+where
+	s.dr = 1
+group by
+	customer,
+	c.customer_id,
+	s.sale_date ,
+	seller
+having
+	min(p.price) = 0
+order by 
+	c.customer_id
