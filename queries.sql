@@ -9,7 +9,7 @@ FROM
 SELECT
 	concat(first_name , ' ', last_name) as name,
 	count(s.sales_id) as operations,
-	COALESCE(sum(s.quantity * p.price),0) income 
+	COALESCE(FLOOR(sum(s.quantity * p.price)),0) income 
 FROM
 	employees e 
 	left join sales s on e.employee_id  = s.sales_person_id 
@@ -47,7 +47,7 @@ order by
 select 
 	concat(first_name , ' ', last_name) as name,
 	to_char(sale_date, 'day') as weekday,
-	COALESCE(sum(s.quantity * p.price),0) income
+	COALESCE(round(sum(s.quantity * p.price)),0) income
 FROM
 	employees e 
 	left join sales s on e.employee_id  = s.sales_person_id 
